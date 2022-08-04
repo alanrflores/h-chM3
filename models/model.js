@@ -168,7 +168,7 @@ module.exports = {
       throw new newBug("Usuario inexistente");
     }
     const filterWatched = findUser.watched.filter((watched) => watched);
-    //console.log(filter)
+    
     if (filterWatched) {
       return filterWatched;
     }
@@ -183,17 +183,34 @@ module.exports = {
     // Si la serie no existe, arroja el Error ('Serie inexistente') y no actualiza el puntaje.
     // Debe recibir un puntaje entre 1 y 5 inclusive. En caso contrario arroja el Error ('Puntaje inválido') y no actualiza el puntaje.
     // Si el usuario no reprodujo la serie, arroja el Error ('Debes reproducir el contenido para poder puntuarlo') y no actualiza el puntaje. >> Hint: pueden usar la función anterior
-   const findUser = users.find(user => user.email === email)
-   const findSerie = series.find(s => s.name === serie.name)
-   if(!findUser){
-     throw new newBug('Usuario inexistente')
-   }
-   if(!findSerie){
-    throw new newBug('Serie inexistente')
-   }
+   let findUser = users.filter(user=> user.email === email)
+   let filterSerie = series.filter(element => element.name === serie);
+   //console.log(filterSerie)
+   if(score >= 1 && score <= 5){
+     if(filterSerie.length === 0) throw new newBug('Serie inexistente');
+     if(findUser.length === 0) throw new newBug('Usuario inexistente');
+     if(findUser[0].watched.length === 0) throw new newBug('Debes reproducir el contenido para poder puntuarlo');
+     //console.log(findUser.watched)
 
+    filterSerie[0].reviews.push({ email : email, score : score });
 
+    let arr = filterSerie[0].reviews;
+
+    let suma = 0;
+    for(let i=0; i<arr.length; i++){
+      //console.log(arr[i])
+    suma = suma + arr[i].score
+    
+    }
    
+    let promedio = suma / arr.length
+    // console.log(promedio)
+    filterSerie[0].rating = promedio;
+
+    return `Le has dado ${score} puntos a la serie ${serie}`;
+   }else{
+     throw new newBug('Puntaje inválido');
+   }
   },
 };
 

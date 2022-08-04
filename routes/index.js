@@ -75,7 +75,7 @@ router.post("/series", (req, res) => {
 
 router.get('/series/:category', (req, res) => {
     const { category } = req.params;
-    console.log(category)
+    //console.log(category)
     try{
         let data = model.listSeries(category);
         //console.log(data)
@@ -88,6 +88,60 @@ router.get('/series/:category', (req, res) => {
 
 })
 //11
+router.get('/play/:serie' , (req, res)=> {
+  const {serie} = req.params;
+  const {user} = req.query;
+  //console.log(serie)
+  //console.log(user)
+   try {
+     let data = model.play(serie, user);
+     //console.log('data', data)
+     return res.status(200).json({msg: `Reproduciendo ${serie}`})
+   } catch (error) {
+    if(error.message === 'Usuario inexistente')  res.status(404).json({ error: error.message });
+    if(error.message === 'Serie inexistente')  res.status(404).json({ error: error.message });
+    if(error.message === 'Contenido no disponible, contrata ahora HenryFlix Premium!') res.status(404).json({ error: error.message });
 
+   }
+})
+
+//12
+router.get('/watchAgain', (req, res)=> {
+   const {user} = req.query;
+   try {
+     let data = model.watchAgain(user);
+     return res.status(200).json(data)
+   } catch (error) {
+    if(error.message === 'Usuario inexistente')  res.status(404).json({ error: error.message });
+   }
+})
+
+//13
+router.post('/rating/:serie', (req, res)=>{
+  const { serie } = req.params;
+  let series = model.listSeries();
+  let userScore = {
+    email: req.body.email,
+    score: req.body.score
+  }
+
+  try {
+    let filtered = series.filter(el => el.name !== serie);
+    const findSerie = series.find(el => el.name === serie);
+    if(findSerie) {
+     // console.log(findSerie.reviews, userScore)
+      findSerie.reviews = [...findSerie.reviews, userScore];
+      series = [...filtered, findSerie];
+     // console.log(series)
+      res.status(200).json({ msg : `Le has dado 5 puntos a la serie ${serie}`})
+    }
+  } catch (error) {
+    if(error.message === 'Usuario inexistente')  res.status(404).json({ error: error.message });
+    if(error.message === 'Serie inexistente')  res.status(404).json({ error: error.message });
+    if(error.message === 'Debes reproducir el contenido para poder puntuarlo')  res.status(404).json({ error: error.message });
+  }
+  
+  
+})
 
 // Hint:  investigá las propiedades del objeto Error en JS para acceder al mensaje en el mismo.
